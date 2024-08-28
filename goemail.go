@@ -25,7 +25,7 @@ func Configure(name, address, pswd string) error {
 
 	// validate sender's email address
 	if len(from_address) == 0 {
-		return fmt.Errorf("from address not set")
+		return fmt.Errorf("sender's email address not set")
 	}
 
 	// ensure email address's domain is supported
@@ -46,7 +46,7 @@ func Configure(name, address, pswd string) error {
 
 	// validate display name
 	if len(display_name) == 0 {
-		return fmt.Errorf("name not set")
+		return fmt.Errorf("sender's name not set")
 	}
 
 	// validate password
