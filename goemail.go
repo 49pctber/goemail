@@ -1,12 +1,14 @@
 package goemail
 
 import (
+	"errors"
 	"fmt"
 	"net/smtp"
 	"strings"
 )
 
 var configured bool = false
+var ErrNotConfigured error = errors.New("goemail is not configured")
 
 var display_name string // display name for from_address
 var from_address string // the address from which the email will originate
@@ -70,10 +72,31 @@ e.g. <phone number>@tmomail.net
 func SendEmail(to, subject, body string) error {
 
 	if !configured {
-		return fmt.Errorf("not configured")
+		return ErrNotConfigured
 	}
 
 	header := fmt.Sprintf("From: %s <%s>\nTo: <%s>\nSubject: %s\n", display_name, from_address, to, subject)
+	message := []byte(header + "\n" + body)
+
+	// send it, bro
+	auth := smtp.PlainAuth("", from_address, password, smtpHost)
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from_address, []string{to}, message)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
+Like SendEmail(), but adds headers to support HTML in the body.
+*/
+func SendHTMLEmail(to, subject, body string) error {
+
+	if !configured {
+		return ErrNotConfigured
+	}
+
+	header := fmt.Sprintf("From: %s <%s>\nTo: <%s>\nSubject: %s\nMIME-version: 1.0;\r\nContent-Type: text/html; charset=\"UTF-8\";\r\n\r\n", display_name, from_address, to, subject)
 	message := []byte(header + "\n" + body)
 
 	// send it, bro
