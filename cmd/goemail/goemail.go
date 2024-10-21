@@ -20,10 +20,12 @@ func main() {
 	}
 
 	var to, subject, body string
+	var html bool
 
 	flag.StringVar(&to, "to", "", "recipient's email address")
 	flag.StringVar(&subject, "subject", "", "subject of message")
 	flag.StringVar(&body, "body", "", "the body of the message")
+	flag.BoolVar(&html, "html", false, "indicate body contains html")
 
 	flag.Parse()
 
@@ -46,7 +48,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = goemail.SendEmail(to, subject, body)
+	// send email
+	if html {
+		err = goemail.SendHTMLEmail(to, subject, body)
+	} else {
+		err = goemail.SendEmail(to, subject, body)
+	}
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
