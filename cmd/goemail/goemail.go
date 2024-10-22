@@ -9,13 +9,15 @@ import (
 )
 
 func main() {
-	var to, subject, body string
+	var to, subject, body, fname string
 	var html bool
 
 	flag.StringVar(&to, "to", "", "recipient's email address")
 	flag.StringVar(&subject, "subject", "", "subject of message")
 	flag.StringVar(&body, "body", "", "the body of the message")
 	flag.BoolVar(&html, "html", false, "indicate body contains html")
+	flag.StringVar(&fname, "file", "", "the file to send (ignores -body tag if included)")
+
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
 		flag.PrintDefaults()
@@ -47,13 +49,23 @@ func main() {
 		fmt.Println("specify subject using -subject flag")
 		valid = false
 	}
-	if len(body) == 0 {
-		fmt.Println("specify body using -body flag")
+	if len(body) == 0 && len(fname) == 0 {
+		fmt.Println("specify body or file to send using -body or -file flags, respectively")
 		valid = false
 	}
 
 	if !valid {
 		os.Exit(1)
+	}
+
+	if len(fname) != 0 {
+		// load file
+		bodybytes, err := os.ReadFile(fname)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		body = string(bodybytes)
 	}
 
 	// send email
